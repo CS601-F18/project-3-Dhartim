@@ -53,7 +53,7 @@ public class HttpServer implements Runnable
 			String requestedmethod[] = message.split("/");
 			String parsemethod = requestedmethod[0].trim();
 			System.out.println(parsemethod);
-			if(!(parsemethod.equals("GET")) && (!parsemethod.equals("POST"))) 
+			if(!(parsemethod.equals("GET")) && (!(parsemethod.equals("POST")))) 
 			{
 				//System.out.println("405 Method Not Allowed");
 				System.out.println("hi");
