@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 public class ServerMain 
 {
 
-	private static final int PORT = 8080;
+	private static final int PORT = 9000;
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
