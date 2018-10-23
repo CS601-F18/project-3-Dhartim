@@ -48,41 +48,46 @@ public class HttpServer implements Runnable
 				message += line + "\n";
 				line = instream.readLine();
 			}
-			System.out.println("Request: \n" + message);
-			
-			String requestedmethod[] = message.split("/");
-			String parsemethod = requestedmethod[0];
-			if(!parsemethod.equals("GET") || !parsemethod.equals("POST"))
-			{
-				//System.out.println("405 Method Not Allowed");
-				String headers = "HTTP/1.0 405 Method Not Allowed\n" +
-						"\r\n";
+				System.out.println("Request: \n" + message);
 
-				String page = "<html> " + 
-						"<head><title>TEST</title></head>" + 
-						"<body>Dont support methods other then GET and POST.</body>" + 
-						"</html>";
+				String requestedmethod[] = message.split("/");
+				String parsemethod = requestedmethod[0].trim();
+				System.out.println(parsemethod);
+				if(!(parsemethod.equals("GET")) && (!parsemethod.equals("POST"))) 
+				{
+					//System.out.println("405 Method Not Allowed");
+					System.out.println("hi");
+					String headers = "HTTP/1.0 405 Method Not Allowed\n" +
+							"\r\n";
 
-				//write back to output screen
-				writer.write(headers);
-				writer.write(page);
-				writer.flush();
-			}
-			
-			//System.out.println(parsemethod);
-			
-			String headers = "HTTP/1.0 200 OK\n" +
-					"\r\n";
+					String page = "<html> " + 
+							"<head><title>TEST</title></head>" + 
+							"<body>Dont support methods other then GET and POST.</body>" + 
+							"</html>";
 
-			String page = "<html> " + 
-					"<head><title>TEST</title></head>" + 
-					"<body>This is a short test page.</body>" + 
-					"</html>";
+					//write back to output screen
+					writer.write(headers);
+					writer.write(page);
+					writer.flush();
+				}
+				else
+				{
+					//System.out.println(parsemethod);
 
-			//write back to output screen
-			writer.write(headers);
-			writer.write(page);
+					String headers = "HTTP/1.0 200 OK\n" +
+							"\r\n";
+
+					String page = "<html> " + 
+							"<head><title>TEST</title></head>" + 
+							"<body>This is a short test page.</body>" + 
+							"</html>";
+
+					//write back to output screen
+					writer.write(headers);
+					writer.write(page);
+				}
 			writer.flush();
+
 		} catch(IOException ioe) {
 			ioe.printStackTrace();
 		}
