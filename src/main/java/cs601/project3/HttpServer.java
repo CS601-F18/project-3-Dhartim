@@ -31,11 +31,8 @@ public class HttpServer implements Runnable
 	{
 		// TODO Auto-generated method stub
 		System.out.println("thread...");
-		//creating server socket
-		try (//ServerSocket serve = new ServerSocket(1024);
-				//Socket sock = serve.accept(); //accepting request from client.
-				//input pipeline
-				BufferedReader instream = new BufferedReader(new InputStreamReader(insocket.getInputStream()));
+		//input pipeline
+		try (	BufferedReader instream = new BufferedReader(new InputStreamReader(insocket.getInputStream()));
 				//output pipeline
 				PrintWriter writer = new PrintWriter(insocket.getOutputStream())) //write data to file.
 		{
@@ -52,12 +49,11 @@ public class HttpServer implements Runnable
 
 			String requestedmethod[] = message.split("/");
 			String parsemethod = requestedmethod[0].trim();
-			System.out.println(parsemethod);
-			System.out.println(requestedmethod[1]);
-			if(!(parsemethod.startsWith("GET")) || !(parsemethod.startsWith("POST"))) //&& (!(parsemethod.equals("POST")))) 
+			//String getAddress = insocket.getInetAddress()
+			if(!(parsemethod.equals("GET") || parsemethod.equals("POST"))) 
 			{
 				//System.out.println("405 Method Not Allowed");
-				System.out.println("hi");
+			//	System.out.println("hi");
 				String headers = "HTTP/1.0 405 Method Not Allowed\n" +
 						"\r\n";
 
