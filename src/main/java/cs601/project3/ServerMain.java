@@ -10,23 +10,18 @@ public class ServerMain
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
-		ServerSocket server;
-		try {
-			server = new ServerSocket(PORT);
+		// server;
+		try (ServerSocket server = new ServerSocket(PORT))
+		{
 			System.out.println("Server Started....on port:- " + PORT);
 			while (true) 
 			{
-			//take client's request
+				//take client's request
 				new HttpServer(server.accept());
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//HttpServer server = new HttpServer(PORT);
-	//	HttpServer server = new HttpServer();
-		//ServerSocket server = new ServerSocket(PORT);
-
 	}
-
 }

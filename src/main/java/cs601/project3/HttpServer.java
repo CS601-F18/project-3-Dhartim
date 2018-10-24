@@ -17,25 +17,25 @@ import java.util.concurrent.Executors;
 public class HttpServer implements Runnable
 {
 	private Socket insocket;
-	ExecutorService executor = Executors.newFixedThreadPool(4);
+	private ExecutorService executor = Executors.newFixedThreadPool(4);
+	private boolean htmlResponseFlag = false;
+	private HtmlResponse htmlResponse = new HtmlResponse();
 	public HttpServer(Socket inSocket) 
 	{
 		this.insocket = inSocket;
 		executor.execute(this);
-		//	this.start();
 		// TODO Auto-generated constructor stub
 	}
-
+	
 	@Override
 	public void run() 
 	{
 		// TODO Auto-generated method stub
-		System.out.println("thread...");
 		//input pipeline
 		try (	BufferedReader instream = new BufferedReader(new InputStreamReader(insocket.getInputStream()));
 				//output pipeline
 				PrintWriter writer = new PrintWriter(insocket.getOutputStream())) //write data to file.
-		{
+			{
 
 			String message = "";
 			//read data from input pipeline
@@ -47,45 +47,16 @@ public class HttpServer implements Runnable
 			}
 			System.out.println("Request: \n" + message);
 
-			String requestedmethod[] = message.split("/");
-			String parsemethod = requestedmethod[0].trim();
-			//String getAddress = insocket.getInetAddress()
-			if(!(parsemethod.equals("GET") || parsemethod.equals("POST"))) 
+			String requestedMethod[] = message.split("/");
+			String parseMethod = requestedMethod[0].trim();
+			if(!(parseMethod.equals("GET") || parseMethod.equals("POST"))) 
 			{
-				//System.out.println("405 Method Not Allowed");
-			//	System.out.println("hi");
-				String headers = "HTTP/1.0 405 Method Not Allowed\n" +
-						"\r\n";
-
-				String page = "<html> " + 
-						"<head><title>TEST</title></head>" + 
-						"<body>Dont support methods other then GET and POST.</body>" + 
-						"</html>";
-
-				//write back to output screen
-				writer.write(headers);
-				writer.write(page);
-				writer.flush();
+				htmlResponseFlag = true;
+				htmlResponse.httpResponse(writer, htmlResponseFlag);
 			}
-
-			//System.out.println(parsemethod);
-
-			String headers = "HTTP/1.0 200 OK\n" +
-					"\r\n";
-
-			String page = "<html> " + 
-					"<head><title>TEST</title></head>" + 
-					"<body>This is a short test page.</body>" + 
-					"</html>";
-
-			//write back to output screen
-			writer.write(headers);
-			writer.write(page);
-			writer.flush();
-
+			htmlResponse.httpResponse(writer, htmlResponseFlag);
 		} catch(IOException ioe) {
 			ioe.printStackTrace();
 		}
-
 	}
 }
