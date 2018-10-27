@@ -16,9 +16,14 @@ public class HttpServer implements Runnable
 	private HashMap<String, Handler> handlersMap;// = new HashMap<>();
 	private ServerSocket server;
 	private ExecutorService executor;
+	//handle request from browser.
+	Request request =  new Request();
+	//handle response from server.
+	Response response = new Response();
 	//private Handler handler;
-	private ReviewSearchHandler reviewHandler = new ReviewSearchHandler();
-	private FindHandler findHandler = new FindHandler();
+//	private ReviewSearchHandler reviewHandler = new ReviewSearchHandler();
+//	private FindHandler findHandler = new FindHandler();
+//	private 
 	public HttpServer(int PORT) 
 	{
 		// TODO Auto-generated constructor stub
@@ -34,6 +39,7 @@ public class HttpServer implements Runnable
 		executor = Executors.newFixedThreadPool(4);
 	}
 	
+	//running server
 	public void startServer()
 	{
 		executor.execute(this);
@@ -53,40 +59,20 @@ public class HttpServer implements Runnable
 					//socket = server.accept();
 					PrintWriter writer = new PrintWriter(socket.getOutputStream())) //write data to file.
 				{
-				//handle request from browser.
-				Request request =  new Request();
-				//handle response from server.
-				Response response = new Response();
 				//read data from input stream
 				String line = reader.readLine();
 				//check first line of request
 				if(line != null && !line.trim().isEmpty())
 				{
-					request.setRequest(line + "\n"); //set it to request.
+					//request.setRequest(line + "\n"); //set it to request.
 					System.out.println(line);
-					//pass it to handler
+					//split request using space
 					String splitrequest[] = splitRequest(line);
-					
+					request.setRequest(splitrequest[0]);
 					//dynamic string to class call
-//					for(String handlers : handlersMap.keySet())
-//					{
-//						if(handlers.equals(splitrequest[1]))
-//						{
-//							//call wat????
-//						}
-//					}
-//					if(handlersMap.containsKey(splitrequest[1]))
-//					{
-//						System.out.println("hey...");
-//					}
-//					if(splitrequest[1].equals("/reviewsearch"))
-//					{
-//						reviewHandler.handle(request, response);
-//					}
-//					else if(splitrequest[1].equals("/find"))
-//					{
-//						findHandler.handle(request, response);
-//					}
+					//if(splitrequest[0].equals))
+					response =  parseRequestLine(splitrequest[1]);
+					
 					//get response....
 					writer.write(response.getHeader());
 					writer.write(response.getResponse());
@@ -115,7 +101,45 @@ public class HttpServer implements Runnable
 	public String[] splitRequest(String line)
 	{
 		String splitrequest[] = line.split("\\s+");
+		if(splitrequest.length != 3)
+		{
+			
+		}
 		return splitrequest;
 		
+	}
+	
+	//parse request line accordingly and return response
+	public Response parseRequestLine(String splitRequest)
+	{
+		if(splitRequest.equals("/reviewsearch") && (handlersMap.containsKey("/reviewsearch")))
+		{
+			Handler reviewHandler = handlersMap.get(splitRequest);
+			reviewHandler.handle(request, response);
+		}
+		else if(splitRequest.equals("/find") && (handlersMap.containsKey("/find")))	
+		{
+			Handler findHandler = handlersMap.get(splitRequest);
+			findHandler.handle(request, response);
+		}
+		else if(splitRequest.equals("/slackbot") && (handlersMap.containsKey("/slackbot")))
+		{
+			Handler chatHandler = handlersMap.get(splitRequest);
+			chatHandler.handle(request, response);
+		}
+		else if(splitRequest.isEmpty())
+		{
+			response.setHeader("HTTP/1.0 405 Method Not Allowed\n" + "\r\n");
+			//response.setResponse("Please give valid request");
+			response.setResponse("<html><head><title>TEST</title></head><body>Invalid input</body></html>");
+		}
+		else
+		{
+			response.setHeader("HTTP/1.0 405 Method Not Allowed\n" + "\r\n");
+			response.setResponse("<html><head><title>TEST</title></head><body>Invalid input</body></html>");
+			//writer.write("<html><head><title>TEST</title></head><body>Invalid input</body></html>");
+		}
+		
+		return response;
 	}
 }
