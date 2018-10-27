@@ -17,7 +17,7 @@ public class ServerMain
 			while (true) 
 			{
 				//take client's request
-				new HttpServer(server.accept());
+				//new HttpServer(server.accept());
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
