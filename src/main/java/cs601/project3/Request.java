@@ -4,21 +4,29 @@ public class Request
 {
 	//get request from client
 	private String request;
-	private String protocol;
-	private String requestPath;
+	private String parameter;
 	
-	public String getProtocol() {
-		return protocol;
+//	private String protocol;
+//	private String requestPath;
+	
+public String getParameter() {
+		return parameter;
 	}
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
 	}
-	public String getRequestPath() {
-		return requestPath;
-	}
-	public void setRequestPath(String requestPath) {
-		this.requestPath = requestPath;
-	}
+	//	public String getProtocol() {
+//		return protocol;
+//	}
+//	public void setProtocol(String protocol) {
+//		this.protocol = protocol;
+//	}
+//	public String getRequestPath() {
+//		return requestPath;
+//	}
+//	public void setRequestPath(String requestPath) {
+//		this.requestPath = requestPath;
+//	}
 	public String getRequest() {
 		return request;
 	}
