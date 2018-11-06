@@ -2,5 +2,5 @@ package cs601.project3;
 
 public interface Handler 
 {
-	public void handle(Request resquest, Response response);
+	public Response handle(Request resquest, Response response);
 }

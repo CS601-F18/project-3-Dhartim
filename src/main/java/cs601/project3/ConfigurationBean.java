@@ -5,6 +5,36 @@ public class ConfigurationBean
 {
 	private String reviewFile;
 	private String qaFile;
+	private String url;
+	private String contentType;
+	private String token;
+	private String channel;
+
+	public String getUrl() {
+		return url;
+	}
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	public String getContentType() {
+		return contentType;
+	}
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+	public String getToken() {
+		return token;
+	}
+	public void setToken(String token) {
+		this.token = token;
+	}
+	public String getChannel() {
+		return channel;
+	}
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+	
 	public String getreviewFile() {
 		return reviewFile;
 	}

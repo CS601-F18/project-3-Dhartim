@@ -1,4 +1,4 @@
-package cs601.project3;
+package cs601.project1;
 /**
  * 
  * @author dhartimadeka

@@ -1,45 +1,57 @@
 package cs601.project3;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import cs601.project1.InvertedIndexBuilder;
+import cs601.project1.AmazonSearch.typeOfFile;
+import cs601.project1.InvertedIndex;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-
-//class to setup inverted index before server starts
-//enum typeOfFile {Review, QA};
 public class SetUpInvertedIndex 
 {
-	//	private static volatile SetUpInvertedIndex setItUp;
-	// = new InvertedIndex();
-	private  String configFile;
+	public static boolean isDataLoading = true;
+	//private Thread reviewThread, qathread;
+	//private Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static SetUpInvertedIndex instance;
+	private String configurationFile;
+	private ReadConfigurationFile readConfigfile = new ReadConfigurationFile();
+	private ConfigurationBean configurationBuilder = new ConfigurationBean();
+	
 
-	public SetUpInvertedIndex(String configfile) 
+	private SetUpInvertedIndex(String file) 
 	{
-		this.configFile = configfile;
+		this.configurationFile = file;
 	}
-	ConfigurationBean config = new ConfigurationBean();
-	Gson gson = new Gson();
-	public void setUpInvertedIndex()
-	{
-		InvertedIndexBuilder invertedIndexBuilder = new InvertedIndexBuilder();
-		InvertedIndex invtIndexReview, invtindexQA;
 
-		try {
-			JsonReader reader = new JsonReader(new FileReader(configFile));
-			config = gson.fromJson(reader, ConfigurationBean.class);
-			//System.out.println(config.getreviewFile());
-
-		} catch (FileNotFoundException e) 
-		{
-			System.exit(0);
+	public static SetUpInvertedIndex getInstance(String file) {
+		if (instance == null) {
+			instance = new SetUpInvertedIndex(file);
 		}
-		Path reviewFile = Paths.get(config.getreviewFile());
-		Path qaFile = Paths.get(config.getqaFile());
-		//System.out.println(file);
-		invtIndexReview = invertedIndexBuilder.readFile(reviewFile, typeOfFile.Review);
-		invtindexQA = invertedIndexBuilder.readFile(qaFile, typeOfFile.QA);
-		//invtIndexReview.addasin(asinId, asinText);
+		return instance;
+	}
+	
+	
+	
+	public void initInvertedIndex() {
+		
+		InvertedIndexBuilder bds = new InvertedIndexBuilder();
+
+		InvertedIndex invertedIndexforReview;
+		InvertedIndex invertedIndexforQA;
+		InvertedIndexInitilizer indexInitilizer = InvertedIndexInitilizer.getInstance();
+		configurationBuilder = readConfigfile.readSlackConfigurationFile(configurationFile);
+		//pass file path
+		Path reviewFile = Paths.get(configurationBuilder.getreviewFile());
+		Path qaFile = Paths.get(configurationBuilder.getqaFile());
+		//logger.log(Level.INFO, String.format(SearchAppLogMsgDict.loading));
+		isDataLoading = true;
+		invertedIndexforReview = bds.readFile(reviewFile, typeOfFile.Review); // create inverted index for review
+		invertedIndexforQA = bds.readFile(qaFile, typeOfFile.QA); // create inverted index for QA.
+		
+		isDataLoading = false;
+
+		indexInitilizer.setInvertIndexReview(invertedIndexforReview);
+		indexInitilizer.setInvertIndexQA(invertedIndexforQA);
+		//logger.log(Level.INFO, String.format(SearchAppLogMsgDict.loadSuccess));
+
 	}
 }

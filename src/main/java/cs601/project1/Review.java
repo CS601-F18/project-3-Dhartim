@@ -1,18 +1,25 @@
-package cs601.project3;
+package cs601.project1;
+
 /**
  *
  * Contains fields for storing relevant information when reading the review text
  * file
  */
-public class Review extends Amazon
-{
+public class Review extends Amazon {
 
 	private String reviewerID;
+	// private String asin;
 	private String reviewText;
 	private double overall;
+
 	public void setReviewerID(String reviewerID) {
 		this.reviewerID = reviewerID;
 	}
+
+//	public void setAsin(String asin) {
+//		this.asin = asin;
+//	}
+
 	public void setReviewText(String reviewText) {
 		this.reviewText = reviewText;
 	}
@@ -20,21 +27,25 @@ public class Review extends Amazon
 	public void setOverall(double overall) {
 		this.overall = overall;
 	}
+
 	public String getReviewerID() {
 		return reviewerID;
 	}
+
+//	public String getAsin() {
+//		return asin;
+//	}
+
 	public String getReviewText() {
 		return reviewText;
 	}
 
-	public double getOverall() 
-	{
+	public double getOverall() {
 		return overall;
 	}
-	
-	public String toString()
-	{
-		return this.asin+"&#"+this.reviewerID+"&#"+this.reviewText;
+
+	public String toString() {
+		return "<tr> <td>" + this.asin + "</td><td>" + this.reviewerID + "</td><td>" + this.reviewText + "</td></tr>";
 	}
 
 }

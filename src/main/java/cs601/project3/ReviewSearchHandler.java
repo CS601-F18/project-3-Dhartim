@@ -1,70 +1,207 @@
 package cs601.project3;
+import java.io.UnsupportedEncodingException;
 
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class ReviewSearchHandler implements Handler 
+public class ReviewSearchHandler implements Handler
 {
-	//private InvertedIndexBuilder invertedIndexBuilder = new InvertedIndexBuilder();
-	private InvertedIndex invertedIndex = new InvertedIndex();
-	private List<String> searchTermResult = new ArrayList<>();
-	String tabledata []; int count=1;
-	String tableRowData = "<tr><th>Record ID</th><th>Asin ID</th><th>Reviewer ID</th><th>Review Text</th></tr>";
-	@Override
-	public void handle(Request request, Response response) 
+	//InvertedIndex invertedIndex = new InvertedIndex();
+	private Charset fileEncoding = Charset.forName("ISO-8859-1");
+	private Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	public Response handle(Request request, Response response) 
 	{
-		//check get or post
-		if(request.getRequest().equals("GET"))
+		// TODO Auto-generated method stub
+		//		if(request.validMethod(request.getRequest()))
+		if(request.validMethod(request.getRequest()).equals("GET"))//request.getRequest().equals("GET"))
 		{
-			handleGet(response);
+			//logger.log(Level.INFO, String.format(SearchAppLogMsgDict.serverRequest, parseMethod));
+			//call get handler
+			response = handleGet(request, response);
+			logger.log(Level.INFO, String.format(SearchAppLogMsgDict.serverRequest, request.getRequest()));
+			//System.out.println("inside get");
+
 		}
-		else if (request.getRequest().equals("POST"))
+		else if(request.validMethod(request.getRequest()).equals("POST"))
+			//else if (request.getRequest().equals("POST"))
 		{
-			handlePost(request, response);
+			//call post handler
+			try {
+				handlePost(request, response);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//System.out.println("inside post");
 		}
 		else
 		{
+			//System.out.println("not valid method");
 			response.setHeader("HTTP/1.0 405 Method Not Allowed\n" + "\r\n");
-			response.setResponse("<html><head><title>Project 3</title></head>"+"<body><h1>405 BAD METHOD PASSED !! </h1></body></html>");
+			response.setResponse(HtmlPages.HTML_405);
+			//System.out.println("hello");
 		}
+		return response;
 	}
 
-	public void handlePost(Request request, Response response)
+	public Response handleGet(Request request, Response response)
 	{
-		//printing value of parameter passed from form
+		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
+		response.setResponse(HtmlPages.HTML_REVIEW_SEARCH_FORM);
+		return response;
+	}
+
+	public Response handlePost(Request request, Response response) throws UnsupportedEncodingException
+	{
 		System.out.println(request.getParameter());
-		//search term from inverted index
-		searchTermResult = invertedIndex.searchterm(request.getParameter().toLowerCase());
-		for(String s : searchTermResult)
+		String postData = URLDecoder.decode(request.getParameter(), fileEncoding.toString());
+		System.out.println("post data" +postData);
+		List<String> result=null;
+		String searchTerm = "", searchQuery ="";
+		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
+		//request.getParameter().charAt(request.getParameter().indexOf("&"));
+		//if(request.getParameter().indexOf("&"))
+		String parameters[];
+		if(postData.contains("&"))
 		{
-			System.out.println(count +"&#" + s);
-			tabledata = s.split("&#");
-			if(tabledata.length > 1)
+			parameters = postData.split("&");
+			System.out.println("parameter" +parameters);
+
+			for(String eachParameters : parameters)
 			{
-				tableRowData += "<tr><td>"+tabledata[0]+ "</td><td>"
-						+tabledata[1]+"</td><td>"+tabledata[2]+"</td><td>" 
-						+tabledata[tabledata.length -1]+ "</td></tr>";
-				count +=1;
+				//System.out.println("parameters...." +eachParameters);
+				String eachEqualParameters[] = eachParameters.split("=");
+				String tableRow = splitData(postData, eachEqualParameters, result, searchQuery, searchTerm, response);
+				response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border = 2><tr><th>Asin number</th>"
+						+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>"+
+						tableRow +"</table></body></html>");
+				//				if(eachParameters.split("=").length > 1)
+				//				{
+				//					searchQuery = eachParameters.split("=")[0];
+				//					searchTerm = eachParameters.split("=")[1];
+				//					if(searchQuery.equals("query") && !(searchTerm.isEmpty()))
+				//					{
+				//						result.addAll(getData(searchTerm));
+				//						String tableRow = "";
+				//						for(String eachrow : result)
+				//							{
+				//								tableRow+= eachrow;
+				//							}
+				//							
+				//							response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border = 2><tr><th>Asin number</th>"
+				//									+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>"+
+				//									tableRow +"</table></body></html>");
+				//						System.out.println(result);
+				//					}
+				//				}
+			}
+		}
+		else if(postData.contains("="))
+		{
+			parameters = postData.split("=");
+			String tableRow = splitData(postData, parameters, result, searchQuery, searchTerm, response);
+			response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border = 2><tr><th>Asin number</th>"
+					+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>"+
+					tableRow +"</table></body></html>");
+		}
+		else
+		{
+			response.setHeader("HTTP/1.1 404 error\n\r\n");
+			response.setResponse(HtmlPages.HTML_404);
+		}
+
+		//		if (request.getParameter().split("=").length > 1) 
+		//		{
+		//			//searchQuery = request.getParameter().split("=")[0];
+		//			searchTerm = request.getParameter().split("=")[1].replaceAll("\\s+", "");
+		//		}
+		//		if(!(searchTerm.isEmpty()))
+		//		{
+		//			result = getData(searchTerm);
+		//		//System.out.println("result= " + result);
+		//		//response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
+		//		String tableRow = "";
+		//		for(String eachrow : result)
+		//		{
+		//			tableRow+= eachrow;
+		//		}
+		//		
+		//		response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border = 2><tr><th>Asin number</th>"
+		//				+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>"+
+		//				tableRow +"</table></body></html>");
+		//		}
+		//		else
+		//		{
+		//			String file = HtmlPages.HTML_EMPTY_MANDATORY_FIELD;
+		//			response.setResponse(file);
+		//		}
+
+		return response;
+	}
+
+	//will data from inverted index
+	public List<String> getData(String word) 
+	{
+		List<String> result = new ArrayList<>();
+		InvertedIndexInitilizer initilizer = InvertedIndexInitilizer.getInstance();
+
+		if ((initilizer.getInvertIndexReview() != null)) 
+		{
+			System.out.println(initilizer.getInvertIndexReview().toString());
+			result = initilizer.getInvertIndexReview().searchterm(word.toLowerCase());
+			System.out.println(result.size());
+		} else {
+			result.add(StaticInfo.loading);
+
+		}
+		return result;
+	}
+
+	public String splitData(String postData, String parameters[], List<String> result, String searchQuery, String searchTerm, Response response )
+	{
+		String tableRow ="";
+		//parameters = postData.split("=");
+		if(parameters.length > 1)
+		{
+			searchQuery = parameters[0];
+			searchTerm = parameters[1];
+			if(searchQuery.equals("query") && !(searchTerm.isEmpty()))
+			{
+				if(searchTerm.split(" ").length > 1)
+				{
+					for(String eachSearchTerm: searchTerm.split(" "))
+					{
+						result = getData(eachSearchTerm);
+						//tableRow = "";
+						for(String eachrow : result)
+						{
+							tableRow+= eachrow;
+							//System.out.println();
+						}
+					}
+				}
+				else
+				{
+					result = getData(searchTerm);
+					//tableRow = "";
+					for(String eachrow : result)
+					{
+						tableRow+= eachrow;
+					}
+				}
+
+				System.out.println("result= " + result);
 			}
 			else
 			{
-				tableRowData = searchTermResult.toString();
+				tableRow = "INVALID QUERY"; 
 			}
-
 		}
-		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
-		response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border = 2>"+
-				tableRowData +"</table></body></html>");
-	}
-
-	public void handleGet(Response response)
-	{
-		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
-		response.setResponse("<html><head><title>Project 3</title></head>"+
-				"<body>"+
-				"<form  action ='/reviewsearch' method='POST'>" +
-				"Enter text: <input type='text' name='query'><br>"+
-				"<input type='submit' value='Submit'>"+
-				"</form></body></html>");
+		System.out.println(tableRow.length());
+		return tableRow;
 	}
 }

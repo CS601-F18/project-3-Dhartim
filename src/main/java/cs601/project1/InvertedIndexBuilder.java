@@ -1,4 +1,4 @@
-package cs601.project3;
+package cs601.project1;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -9,6 +9,8 @@ import java.util.HashMap;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+
+import cs601.project1.AmazonSearch.typeOfFile;
 
 public class InvertedIndexBuilder 
 {	
@@ -28,6 +30,7 @@ public class InvertedIndexBuilder
 		InvertedIndex invertedIndex = new InvertedIndex();
 		Review rdObj = new Review();
 		QA qaObj = new QA();
+		//int invertedindexcount =0;
 		HashMap<String,Integer> termToFrequency;
 		try(
 				BufferedReader br = Files.newBufferedReader(pathOfFile, Charset.forName("ISO-8859-1")))
@@ -36,7 +39,10 @@ public class InvertedIndexBuilder
 			while((readLineFromFile = br.readLine()) != null)
 			{
 				readLineFromFile = readLineFromFile.trim().replace("\\s+", " ");
-//				
+				
+//				String filecheck = rdObj.getClass().getSimpleName();
+//				System.out.println(filecheck);
+//				System.out.println("FT\t" + fileType);
 				if(fileType == (typeOfFile.Review))
 				{
 					rdObj = gson.fromJson(readLineFromFile, Review.class);
@@ -64,13 +70,14 @@ public class InvertedIndexBuilder
 				if(fileType == typeOfFile.Review)
 				{	
 					invertedIndex = updatingInvertedIndex(rdObj, termToFrequency,invertedIndex);
+					//System.out.println("adding data..." + invertedIndex);
 				}
 				else 
 				{
 					invertedIndex = updatingInvertedIndex(qaObj, termToFrequency,invertedIndex);
 					//System.out.println("adding data..." + invertedIndex);
 				}
-
+				
 			}
 		}catch (IOException e) {
 			// TODO Auto-generated catch block

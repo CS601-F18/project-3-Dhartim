@@ -1,28 +1,38 @@
 package cs601.project3;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+//import cs601.project3.LogManager;
+
 public class SearchApplication {
 
-	private static final int PORT = 8080;
+	private final static Logger logger =  Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 
+	static int port = 8080;
+
 	public static void main(String[] args) 
 	{
-		// TODO Auto-generated method stub
-		//int port = 1024;
+		if(args.length != 1)
+		{
+			System.out.println("please specify configuration file name");
+			System.exit(0);
+		}
 		String ConfigFileName = args[0];
-		//SetUpInvertedIndex invertedIndex = SetUpInvertedIndex.getInstance(ConfigFileName);
-		//call and make inverted index before server starts....
-		SetUpInvertedIndex invtIndex = new SetUpInvertedIndex(ConfigFileName);
-		invtIndex.setUpInvertedIndex();
-		System.out.println("Data loaded successfully");
-		HttpServer server = new HttpServer(PORT);
+		logger.log(Level.INFO, String.format(SearchAppLogMsgDict.loading));
+		SetUpInvertedIndex setUpInvertedIndex = SetUpInvertedIndex.getInstance(ConfigFileName);
+		setUpInvertedIndex.initInvertedIndex();
+		logger.log(Level.INFO, String.format(SearchAppLogMsgDict.loadSuccess));
+		HttpServer server = new HttpServer(port);
 		//The request GET /reviewsearch will be dispatched to the 
 		//handle method of the ReviewSearchHandler.
 		server.addMapping("/reviewsearch", new ReviewSearchHandler());
 		//The request GET /find will be dispatched to the 
 		//handle method of the FindHandler.
 		server.addMapping("/find", new FindHandler());
-		//System.out.println();
+		logger.log(Level.INFO, String.format(SearchAppLogMsgDict.urlMapping));
+		
+		logger.log(Level.INFO, String.format(SearchAppLogMsgDict.serverStart));
 		server.startServer();
-
+		//logger.log(Level.INFO, String.format(SearchAppLogMsgDict.));
 	}
 
 }

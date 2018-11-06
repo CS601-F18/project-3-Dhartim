@@ -1,73 +1,98 @@
 package cs601.project3;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class FindHandler implements Handler {
+//import cs601.project1.*;
 
-	//private InvertedIndexBuilder invertedIndexBuilder = new InvertedIndexBuilder();
-	private InvertedIndex invertedIndex = new InvertedIndex();
-	private List<String> searchTermResult = new ArrayList<>();
-	String tabledata []; int count=1;
-	String tableRowData = "";
-	@Override
-	public void handle(Request request, Response response) 
+public class FindHandler implements Handler
+{
+	//InvertedIndex invertedIndex = new InvertedIndex();
+	private Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);  
+	
+	public Response handle(Request request, Response response) 
 	{
-		//check get or post
-		if(request.getRequest().equals("GET"))
+		// TODO Auto-generated method stub
+		
+		if(request.validMethod(request.getRequest()).equals("GET"))//request.getRequest().equals("GET"))
 		{
-			handleGet(response);
+			//call get handler
+			response = handleGet(request, response);
+			logger.log(Level.INFO, String.format(SearchAppLogMsgDict.serverRequest, request.getRequest()));
+			//System.out.println("inside get");
+
 		}
-		else if (request.getRequest().equals("POST"))
+		else if(request.validMethod(request.getRequest()).equals("POST"))
+			//else if (request.getRequest().equals("POST"))
 		{
+			//call post handler
 			handlePost(request, response);
+			//System.out.println("inside post");
 		}
 		else
 		{
 			response.setHeader("HTTP/1.0 405 Method Not Allowed\n" + "\r\n");
-			response.setResponse("<html><head><title>Project 3</title></head>"+"<body><h1>405 BAD METHOD PASSED !! </h1></body></html>");
+			response.setResponse(HtmlPages.HTML_405);
 		}
+		return response;
 	}
-
-	public void handlePost(Request request, Response response)
+	
+	public Response handleGet(Request request, Response response)
 	{
-		//printing value of parameter passed from form
-		System.out.println(request.getParameter());
-		//search term from inverted index
-		//invertedIndex.addasin(request.getParameter().toLowerCase(), invertedIndex);
-		searchTermResult = invertedIndex.findAsin(request.getParameter().toLowerCase());
-		System.out.println(searchTermResult);
-		for(String s : searchTermResult)
+		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
+		response.setResponse(HtmlPages.HTML_FIND_FORM);
+		return response;
+	}
+	
+	public Response handlePost(Request request, Response response)
+	{
+		List<String> result=null;
+		String searchQuery ="", searchTerm = "";
+		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
+		if (request.getParameter().split("=").length > 1) 
 		{
-			System.out.println(count +"&#" + s);
-			tabledata = s.split("&#");
-			if(tabledata.length > 1)
-			{
-				tableRowData += "<tr><td>"+tabledata[0]+ "</td><td>"
-						+tabledata[1]+"</td><td>"+tabledata[2]+"</td><td>" 
-						+tabledata[tabledata.length -1]+ "</td></tr>";
-				count +=1;
-			}
-			else
-			{
-				tableRowData = searchTermResult.toString();
-			}
+			searchQuery = request.getParameter().split("=")[0];
+			searchTerm = request.getParameter().split("=")[1].replaceAll("\\s+", "");
+		}
+		if(searchQuery.equals("asin") && !(searchTerm.isEmpty()))
+		{
+			result = getData(searchTerm);
+		System.out.println("result= " + result);
+		//response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
+		String tableRow = "";
+		for(String eachrow : result)
+		{
+			tableRow+= eachrow;
+		}
+		response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border = 2><tr><th>Asin number</th>"
+				+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>"+
+				tableRow +"</table></body></html>");
+		}
+		else
+		{
+			String file = HtmlPages.HTML_EMPTY_MANDATORY_FIELD;
+			response.setResponse(file);
+		}
+		return response;
+	}
+	
+	//will asin  from inverted index
+	public List<String> getData(String word) {
+		List<String> result = new ArrayList<>();
+		
+		InvertedIndexInitilizer initilizer = InvertedIndexInitilizer.getInstance();
+
+		if ((initilizer.getInvertIndexReview() != null) && (initilizer.getInvertIndexQA() != null)) {
+
+			result = initilizer.getInvertIndexReview().findAsin(word.toLowerCase());
+			
+		} else {
+			result.add(StaticInfo.loading);
 
 		}
-		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
-		response.setResponse("<html><head><title>Project 3</title></head>"+"<body>"+
-				"<table border = 2 >"+
-				tableRowData+"</table></body></html>");
+
+		return result;
 	}
 
-	public void handleGet(Response response)
-	{
-		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
-		response.setResponse("<html><head><title>Project 3</title></head>"+
-				"<body>"+
-				"<form  action ='/find' method='POST'>" +
-				"Enter text: <input type='text' name='query'><br>"+
-				"<input type='submit' value='Submit'>"+
-				"</form></body></html>");
-	}
 }

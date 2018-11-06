@@ -1,7 +1,9 @@
 package cs601.project3;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -9,28 +11,38 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HttpServer implements Runnable
 {
 	//to handle handlers
 	private HashMap<String, Handler> handlersMap;
+	private final static Logger logger =  Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 
 	private ServerSocket server;
 	private ExecutorService executor;
+	private boolean requestResult;
+	private static volatile boolean running = true;
+	private Handler handler;
 	//handle request from browser.
-	Request request =  new Request();
+	private Request request =  new Request();
 	//handle response from server.
-	Response response = new Response(); 
-	int length = 0;
+	private Response response = new Response(); 
+	//private int length = 0;
+
 	public HttpServer(int PORT) 
 	{
 		// TODO Auto-generated constructor stub
-		handlersMap =  new HashMap<>();
+		handlersMap =  new HashMap<String, Handler>();
 		try {
 			//creating server socket
 			server =  new ServerSocket(PORT);
+			logger.log(Level.INFO, String.format(ServerMsgLog.serverListening, PORT));
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			logger.log(Level.SEVERE, String.format(ServerMsgLog.serverNotStarted, PORT));
 		}
 
 		executor = Executors.newFixedThreadPool(4);
@@ -39,129 +51,123 @@ public class HttpServer implements Runnable
 	public void startServer()
 	{
 		executor.execute(this);
+		//System.out.println("hello...");
 	}
-	@Override
-	public void run() 
-	{
-		// TODO Auto-generated method stub
-		//socket = server.accept();
-		while(true)
-		{
-			
-			try (	Socket socket = server.accept();
-					BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-					//output pipeline
-					//socket = server.accept();
-					PrintWriter writer = new PrintWriter(socket.getOutputStream())) //write data to file.
-				{
-				//read data from input stream
-				//String line = "";
-				
-				String line = reader.readLine();
-				System.out.println(line);
-				//String header[];
-				//split line using space in this method
-				String splitRequest[] = splitRequest(line);
-				request.setRequest(splitRequest[0]);
-				//response =  parseRequestLine(splitRequest[1]);
-				//check first line of request
-				while((line = reader.readLine()) != null && (line.length() != 0))
-				//while(line != null && !line.trim().isEmpty())
-				{
-					System.out.println(line);
-					//if content length in post request
-					if(line.startsWith("Content-Length:")) 
-					{
-						length = Integer.parseInt(line.split(":")[1].trim());
-					}
-				}
-				//read characters
-				char[] readParameter = new char[length];
-				reader.read(readParameter);
-				//covert to string
-				String readParams = new String(readParameter);
-				//split it to get term to search
-				String splitParameters[] = readParams.split("=");
-				//pass term to request and set it there
-				if(splitParameters.length > 1)
-				{
-					request.setParameter(splitParameters[1]);
-				}
-				//response from request line accordingly
-				response =  parseRequestLine(splitRequest[1]);
-				
-			//	System.out.println("term" + request.getParameter());
-				writer.write(response.getHeader());
-				writer.write(response.getResponse());
-				writer.flush();
-				//writer.flush();
-			}
-			catch (IOException e) 
-			{
-				// TODO: handle exception
-			}
-		}
 
-	}
-	
 	public void addMapping(String handlertype, Handler handler)
 	{
 		handlersMap.put(handlertype, handler);
 		//System.out.println(handlersMap);
 	}
 
-	//to split request line with space
-	public String[] splitRequest(String line)
+	public void run() 
 	{
-		String splitRequest[] = line.split("\\s+");
-	//	System.out.println();
-		//check array length to be more than 3
-		if(splitRequest.length != 3)
-		{
-			response.setHeader("HTTP/1.0 405 Method Not Allowed\n" + "\r\n");
-			response.setResponse("<html><head><title>Project 3</title></head><body>Length of request has to be 3</body></html>");
-		}
-		//System.out.println("splitrequest is....."+splitRequest.toString());
-		return splitRequest;
-		
-	}
-	
-	//parse request line accordingly and return response
-	public Response parseRequestLine(String splitRequest)
-	{
-		System.out.println(splitRequest);
-		if(splitRequest.equals("/reviewsearch") && (handlersMap.containsKey("/reviewsearch")))
-		{
-			//get handler of respective class and call handle methods in each
-			Handler reviewHandler = handlersMap.get(splitRequest);
-			reviewHandler.handle(request, response);
-		}
-		else if(splitRequest.equals("/find") && (handlersMap.containsKey("/find")))	
-		{
-			Handler findHandler = handlersMap.get(splitRequest);
-			findHandler.handle(request, response);
-		}
-		else if(splitRequest.equals("/slackbot") && (handlersMap.containsKey("/slackbot")))
+		while(running)
 		{
 			System.out.println("here");
-			Handler chatHandler = handlersMap.get(splitRequest);
-			chatHandler.handle(request, response);
+			logger.log(Level.INFO, String.format(ServerMsgLog.serverUp));
+			
+			try(Socket socket = server.accept();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					InputStream instream = socket.getInputStream();
+					PrintWriter writer = new PrintWriter(socket.getOutputStream()))
+			{
+				String line = oneLine(instream);
+				//logger.log(Level.INFO, String.format(ServerMsgLog.serverMethodUrlReq, line));
+				//String line  = reader.readLine();
+				requestResult = request.validRequest(line);
+				System.out.println("line :- " + line);
+				if(!requestResult)
+				{
+					handler = new ErrorHandler();
+					//return;
+				}
+					String method = "", path = "";
+					String splitline[] = line.split("\\s+");
+					if(splitline.length > 1)
+					{
+						method = splitline[0];
+						path = splitline[1];
+					}
+					System.out.println("method = " + method + " path = " + path);
+					handler = request.isPathValid(path, handlersMap, response);
+					System.out.println(handler.getClass().toString());
+					request.setRequest(method);
+					//logger.log(Level.INFO, String.format(ServerMsgLog.method, method));
+					//System.out.println("");
+					int postLength = -1;
+					String postData;
+					//System.out.println(method + path );
+					while(line != null && !line.trim().isEmpty()) 
+						//logger.log(Level.INFO, String.format(ServerMsgLog.serverLog, line));
+						
+					{
+						System.out.println(line);
+						line += "\n";
+						line = oneLine(instream);
+						if (line.indexOf("Content-Length:") > -1) 
+						{
+							postLength = Integer.parseInt(line.split(":")[1].trim());
+							System.out.println("post length = " + postLength);
+						}
+					}	
+					if (postLength > 0) 
+					{
+						postData = readAndPassPostData(reader, postLength);
+						System.out.println(postData);
+						request.setParameter(postData);
+						//logger.log(Level.INFO, String.format(ServerMsgLog.postedData, postData));
+					}
+					if(handler != null)
+					{
+						response = handler.handle(request, response);
+						//System.out.println(response.getHeader());
+						//System.out.println(response.getResponse());
+						writer.write(response.getHeader());
+						writer.write(response.getResponse());
+						writer.flush();
+					}
+				//} 
+			}catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.log(Level.SEVERE, String.format(ServerMsgLog.serverThreadStop));
+				e.printStackTrace();
+			}
+
 		}
-		else if(splitRequest.isEmpty())
-		{
-			response.setHeader("HTTP/1.0 405 Method Not Allowed\n" + "\r\n");
-			//response.setResponse("Please give valid request");
-			response.setResponse("<html><head><title>Project 3</title></head><body>Invalid input</body></html>");
-		}
-		else
-		{
-			response.setHeader("HTTP/1.0 405 Method Not Allowed\n" + "\r\n");
-			response.setResponse("<html><head><title>Project 3</title></head><body>Invalid input</body></html>");
-			//writer.write("<html><head><title>TEST</title></head><body>Invalid input</body></html>");
-		}
-		
-		return response;
 	}
-	
-	
+
+	public String oneLine(InputStream instream)throws IOException
+	{
+		// TODO Auto-generated method stub
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		byte b = (byte) instream.read();
+		while(b != '\n' && b != -1) 
+		{
+			bout.write(b);
+			b = (byte) instream.read();
+		}
+		return new String(bout.toByteArray());
+		//return null;
+	}
+
+	public String readAndPassPostData(BufferedReader reader, int postLength)
+	{
+		String postData;
+		char[] charArray = new char[postLength];
+		//postData = oneLine(reader);
+		try {
+			reader.read(charArray, 0, postLength);
+			//System.out.println();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		postData = new String(charArray);
+		System.out.println(postData);
+		return postData;
+		//request.setParameter(postData);
+
+	}
+
 }
