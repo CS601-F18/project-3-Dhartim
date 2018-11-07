@@ -74,11 +74,11 @@ public class Request
 	public Handler isPathValid(String requestPath, HashMap<String, Handler> handlersMap, Response response)
 	{
 		Handler handler = new ErrorHandler();
-		//System.out.println("requestpath = " +requestPath);
+		
 		for (String path : handlersMap.keySet()) {
 			if (requestPath.contains(path)) 
 			{
-				//System.out.println("here.........." + path);
+				
 				handler = handlersMap.get(path);
 			}
 		}

@@ -2,7 +2,7 @@ package cs601.project3;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import cs601.project3.LogManager;
+
 /**
  * SearchApplication - main class of search application
  * @author dhartimadeka

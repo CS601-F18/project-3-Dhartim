@@ -83,23 +83,25 @@ public class InvertedIndexTest
 	
 	
 	
-	//@Test
-//	public void checkFormInResponseTest()
-//	{
-//		
-//		try {
-//			connection = (HttpURLConnection) new URL("http://localhost:2020/reviewsearch").openConnection();
-//			System.out.println(connection);
-//			connection.connect();
-//			//System.out.print(connection.connect());
-//			System.out.println(checkResponse(connection));
-//			assertTrue(checkResponse(connection).contains("html"));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-	//}
+	@Test
+	public void checkFormInResponseTest()
+	{
+		
+		try {
+			connection = (HttpURLConnection) new URL("http://localhost:2020/reviewsearch").openConnection();
+			System.out.println(connection);
+			connection.connect();
+			//System.out.print(connection.connect());
+			System.out.println(checkResponse(connection));
+			String check = checkResponse(connection);
+			System.out.println(check);
+			assertEquals("html",checkResponse(connection).contains("html"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 //	@Test
 //	public void checkReviewParameterTest()

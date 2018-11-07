@@ -74,9 +74,9 @@ public class ReviewSearchHandler implements Handler
 	 */
 	public Response handlePost(Request request, Response response) throws UnsupportedEncodingException
 	{
-		System.out.println(request.getParameter());
+		
 		String postData = URLDecoder.decode(request.getParameter(), fileEncoding.toString());
-		System.out.println("post data" +postData);
+		
 		List<String> result=null;
 		String searchTerm = "", searchQuery ="";
 		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
@@ -84,7 +84,7 @@ public class ReviewSearchHandler implements Handler
 		if(postData.contains("&"))
 		{
 			parameters = postData.split("&");
-			System.out.println("parameter" +parameters);
+			
 
 			for(String eachParameters : parameters)
 			{
@@ -160,6 +160,7 @@ public class ReviewSearchHandler implements Handler
 					{
 
 						result = getData(eachSearchTerm);
+						//to limit records , to avoid java heap
 						for(int i=0 ;i<1100;i++){
 							tableRow+= result.get(i);
 						}
@@ -168,6 +169,7 @@ public class ReviewSearchHandler implements Handler
 				else
 				{
 					result = getData(searchTerm);
+					//to avoid java heap...limiting data
 					for(int i=0;i < 1100 ; i++)
 					{
 						tableRow+= result.get(i);
