@@ -9,7 +9,11 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 
 import javax.net.ssl.HttpsURLConnection;
-
+/**
+ * SlackBot - pss message to slack boy.
+ * @author dhartimadeka
+ *
+ */
 public class SlackBot 
 {
 	private static String configurationfile;
@@ -23,9 +27,15 @@ public class SlackBot
 		// TODO Auto-generated constructor stub
 		SlackBot.configurationfile = filePath;
 	}
+	
+	/**
+	 * sendMsgToSlack - pass message to slack
+	 * @param message - message to be send into slack
+	 * @return
+	 */
 	public boolean sendMsgToSlack(String message)
 	{
-		configuration = readConfigFile.readSlackConfigurationFile(configurationfile);
+		configuration = readConfigFile.readJsonFile(configurationfile);
 		
 		System.out.println(message);
 		//get text from url in encoded form so has to decode it....
@@ -62,13 +72,10 @@ public class SlackBot
 			{
 				return false;
 			}
-			//outputstream.close
-			//System.out.println("connecting");
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		return false;

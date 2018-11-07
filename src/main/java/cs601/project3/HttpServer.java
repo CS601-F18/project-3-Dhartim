@@ -13,7 +13,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+/**
+ * HttpServer - will setup connection with client and handle get and post request according to application.
+ * @author dhartimadeka
+ *
+ */
 public class HttpServer implements Runnable
 {
 	//to handle handlers
@@ -28,7 +32,6 @@ public class HttpServer implements Runnable
 	private Request request =  new Request();
 	//handle response from server.
 	private Response response = new Response(); 
-	//private int length = 0;
 
 	public HttpServer(int PORT) 
 	{
@@ -38,7 +41,7 @@ public class HttpServer implements Runnable
 			//creating server socket
 			server =  new ServerSocket(PORT);
 			logger.log(Level.INFO, String.format(ServerMsgLog.serverListening, PORT));
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -47,86 +50,80 @@ public class HttpServer implements Runnable
 
 		executor = Executors.newFixedThreadPool(4);
 	}
+	/**
+	 * startServer - start server with threadpool
+	 */
 	//running server
 	public void startServer()
 	{
 		executor.execute(this);
-		//System.out.println("hello...");
 	}
-
+	/**
+	 * addMapping - Add api and respective application in hashmap and handle it
+	 * @param handlertype - pass api path
+	 * @param handler - pass application object.
+	 */
 	public void addMapping(String handlertype, Handler handler)
 	{
 		handlersMap.put(handlertype, handler);
-		//System.out.println(handlersMap);
 	}
 
+	/**
+	 * run - start thread for different servers.
+	 */
 	public void run() 
 	{
 		while(running)
 		{
-			System.out.println("here");
 			logger.log(Level.INFO, String.format(ServerMsgLog.serverUp));
-			
+
 			try(Socket socket = server.accept();
 					BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					InputStream instream = socket.getInputStream();
 					PrintWriter writer = new PrintWriter(socket.getOutputStream()))
 			{
 				String line = oneLine(instream);
-				//logger.log(Level.INFO, String.format(ServerMsgLog.serverMethodUrlReq, line));
-				//String line  = reader.readLine();
+				System.out.println(line);
 				requestResult = request.validRequest(line);
-				System.out.println("line :- " + line);
 				if(!requestResult)
 				{
 					handler = new ErrorHandler();
-					//return;
 				}
-					String method = "", path = "";
-					String splitline[] = line.split("\\s+");
-					if(splitline.length > 1)
+				String method = "", path = "";
+				String splitline[] = line.split("\\s+");
+				if(splitline.length > 1)
+				{
+					method = splitline[0];
+					path = splitline[1];
+				}
+				
+				handler = request.isPathValid(path, handlersMap, response);
+				request.setRequest(method);
+				int postLength = -1;
+				String postData;
+				
+				while(line != null && !line.trim().isEmpty()) 
+				{
+					line += "\n";
+					line = oneLine(instream);
+					System.out.println(line);
+					if (line.indexOf("Content-Length:") > -1) 
 					{
-						method = splitline[0];
-						path = splitline[1];
+						postLength = Integer.parseInt(line.split(":")[1].trim());
 					}
-					System.out.println("method = " + method + " path = " + path);
-					handler = request.isPathValid(path, handlersMap, response);
-					System.out.println(handler.getClass().toString());
-					request.setRequest(method);
-					//logger.log(Level.INFO, String.format(ServerMsgLog.method, method));
-					//System.out.println("");
-					int postLength = -1;
-					String postData;
-					//System.out.println(method + path );
-					while(line != null && !line.trim().isEmpty()) 
-						//logger.log(Level.INFO, String.format(ServerMsgLog.serverLog, line));
-						
-					{
-						System.out.println(line);
-						line += "\n";
-						line = oneLine(instream);
-						if (line.indexOf("Content-Length:") > -1) 
-						{
-							postLength = Integer.parseInt(line.split(":")[1].trim());
-							System.out.println("post length = " + postLength);
-						}
-					}	
-					if (postLength > 0) 
-					{
-						postData = readAndPassPostData(reader, postLength);
-						System.out.println(postData);
-						request.setParameter(postData);
-						//logger.log(Level.INFO, String.format(ServerMsgLog.postedData, postData));
-					}
-					if(handler != null)
-					{
-						response = handler.handle(request, response);
-						//System.out.println(response.getHeader());
-						//System.out.println(response.getResponse());
-						writer.write(response.getHeader());
-						writer.write(response.getResponse());
-						writer.flush();
-					}
+				}	
+				if (postLength > 0) 
+				{
+					postData = readAndPassPostData(reader, postLength);
+					request.setParameter(postData);
+				}
+				if(handler != null)
+				{
+					response = handler.handle(request, response);
+					writer.write(response.getHeader());
+					writer.write(response.getResponse());
+					writer.flush();
+				}
 				//} 
 			}catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -136,7 +133,12 @@ public class HttpServer implements Runnable
 
 		}
 	}
-
+	/**
+	 * oneLine - read line from InputStream reader and convert it into String.
+	 * @param instream - stream to read data from
+	 * @return A string which is converted from an byte array.
+	 * @throws IOException
+	 */
 	public String oneLine(InputStream instream)throws IOException
 	{
 		// TODO Auto-generated method stub
@@ -151,11 +153,16 @@ public class HttpServer implements Runnable
 		//return null;
 	}
 
+	/**
+	 * readAndPassPostData - read line and pass post data from body of post.
+	 * @param reader - take data from bufferedReader.
+	 * @param postLength - length of Content-length
+	 * @return
+	 */
 	public String readAndPassPostData(BufferedReader reader, int postLength)
 	{
 		String postData;
 		char[] charArray = new char[postLength];
-		//postData = oneLine(reader);
 		try {
 			reader.read(charArray, 0, postLength);
 			//System.out.println();
@@ -164,10 +171,7 @@ public class HttpServer implements Runnable
 			e.printStackTrace();
 		}
 		postData = new String(charArray);
-		System.out.println(postData);
 		return postData;
-		//request.setParameter(postData);
-
 	}
 
 }

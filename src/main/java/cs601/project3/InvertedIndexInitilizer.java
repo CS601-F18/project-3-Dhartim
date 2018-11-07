@@ -1,7 +1,11 @@
 package cs601.project3;
 
 import cs601.project1.InvertedIndex;
-
+/**
+ * InvertedIndexInitilizer - Initialize inverted index
+ * @author dhartimadeka
+ *
+ */
 public class InvertedIndexInitilizer {
 
 	private static InvertedIndexInitilizer instance;

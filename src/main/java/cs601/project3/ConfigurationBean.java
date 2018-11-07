@@ -1,6 +1,9 @@
 package cs601.project3;
-
-//class to get review file path and qa file path from properties files
+/**
+ * CongirationBean - Class to get configuration.json elements into java objects.
+ * @author dhartimadeka
+ *
+ */
 public class ConfigurationBean 
 {
 	private String reviewFile;

@@ -58,12 +58,18 @@ public class InvertedIndex {
 		List<WrapperFrequency> objectToFrequency; //
 		List<String> sortedterms = new ArrayList<>();
 		List<String> result = new ArrayList<>();
-		if (invertedIndex.containsKey(term)) {
-			if (sortedterms.contains(term)) {
-				for (WrapperFrequency wrap : invertedIndex.get(term)) {
+		
+		if (invertedIndex.containsKey(term)) 
+		{
+			if (sortedterms.contains(term)) 
+			{
+				for (WrapperFrequency wrap : invertedIndex.get(term)) 
+				{
 					result.add(wrap.getObj().toString()); // add element into result
 				}
-			} else {
+			} 
+			else 
+			{
 				objectToFrequency = invertedIndex.get(term); // fetching arraylist of each term
 				objectToFrequency = sort(objectToFrequency); // sorting it
 				invertedIndex.put(term, objectToFrequency);
@@ -72,9 +78,11 @@ public class InvertedIndex {
 					result.add(wrap.getObj().toString()); // add element into result
 				}
 			}
-		} else {
+		}
+		else {
 			result.add(StaticInfo.termNotFound);
 		}
+		//System.out.println("size of result" +result.size());
 		return result;
 
 	}

@@ -2,8 +2,12 @@ package cs601.project3;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import cs601.project3.LogManager;
-
+import cs601.project3.LogManager;
+/**
+ * SearchApplication - main class of search application
+ * @author dhartimadeka
+ *
+ */
 public class SearchApplication {
 
 	private final static Logger logger =  Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 
@@ -32,7 +36,6 @@ public class SearchApplication {
 		
 		logger.log(Level.INFO, String.format(SearchAppLogMsgDict.serverStart));
 		server.startServer();
-		//logger.log(Level.INFO, String.format(SearchAppLogMsgDict.));
 	}
 
 }

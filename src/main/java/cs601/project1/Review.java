@@ -45,7 +45,7 @@ public class Review extends Amazon {
 	}
 
 	public String toString() {
-		return "<tr> <td>" + this.asin + "</td><td>" + this.reviewerID + "</td><td>" + this.reviewText + "</td></tr>";
+		return "<tr><td>" + this.asin + "</td><td>" + this.reviewerID + "</td><td>" + this.reviewText + "</td></tr>";
 	}
 
 }

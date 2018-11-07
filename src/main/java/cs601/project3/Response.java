@@ -1,5 +1,9 @@
 package cs601.project3;
-
+/**
+ * Response - header and body of http response
+ * @author dhartimadeka
+ *
+ */
 public class Response {
 	private String header;
 	private String response;

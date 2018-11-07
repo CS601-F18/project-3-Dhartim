@@ -1,5 +1,9 @@
 package cs601.project3;
-
+/**
+ * Messages for server log
+ * @author dhartimadeka
+ *
+ */
 public interface ServerMsgLog {
 	
 	String serverListening = "Server is Up, listing at port : %s";
