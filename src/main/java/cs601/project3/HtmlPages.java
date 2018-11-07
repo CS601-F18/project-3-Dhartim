@@ -48,8 +48,8 @@ public interface HtmlPages {
 			"<body>\r\n" +
 			"<h1>Find Asin Search </h1>"+
 			"	<form action='/find' method='POST'>\r\n" + 
-			"		Enter text: <input type='text' name='asin'><br> \r\n" + 
-			"		<input type='submit' value='Submit'>\r\n" +  
+			"		Enter text: <input type='text' name='asin' required='required' /><br> \r\n" + 
+			"		<input type='submit' value='Submit' />\r\n" +  
 			"	</form>\r\n" + 
 			"</body>\r\n" + 
 			"</html>";
@@ -63,8 +63,8 @@ public interface HtmlPages {
 			"<body>\r\n" + 
 			"<h1>Review Search </h1>"+
 			"	<form  action='/reviewsearch' method='POST'>\r\n" + 
-			"		Enter text: <input type='text' name='query' required><br> <input\r\n" + 
-			"			type='submit' value='Submit'>\r\n" + 
+			"		Enter text: <input type='text' name='query' required='required' /><br/> <input\r\n" + 
+			"			type='submit' value='Submit' />\r\n" + 
 	
 			"	</form>\r\n" + 
 			"</body>\r\n" + 
@@ -79,8 +79,8 @@ public interface HtmlPages {
 			"<body>\r\n" + 
 			"<h1>Chat application Message </h1>"+
 			"	<form  action='/slackbot' method='POST'>\r\n" + 
-			"		Enter text: <input type='text' name='message' required><br> <input\r\n" + 
-			"			type='submit' value='Submit'>\r\n" + 
+			"		Enter text: <input type='text' name='message' required='required' /><br/> <input\r\n" + 
+			"			type='submit' value='Submit' />\r\n" + 
 	
 			"	</form>\r\n" + 
 			"</body>\r\n" + 

@@ -1,4 +1,7 @@
 package cs601.project3;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -12,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class FindHandler implements Handler
 {
-	//InvertedIndex invertedIndex = new InvertedIndex();
+	private Charset fileEncoding = Charset.forName("ISO-8859-1");
 	private Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);  
 	/**
 	 * handle - will handle get and post request and 
@@ -29,7 +32,7 @@ public class FindHandler implements Handler
 			//call get handler
 			response = handleGet(request, response);
 			logger.log(Level.INFO, String.format(SearchAppLogMsgDict.serverRequest, request.getRequest()));
-			//System.out.println("inside get");
+			
 
 		}
 		else if(request.validMethod(request.getRequest()).equals("POST"))
@@ -37,7 +40,6 @@ public class FindHandler implements Handler
 		{
 			//call post handler
 			handlePost(request, response);
-			//System.out.println("inside post");
 		}
 		else
 		{
@@ -66,32 +68,41 @@ public class FindHandler implements Handler
 	 */
 	public Response handlePost(Request request, Response response)
 	{
+		String postData="";
+		try {
+			postData = URLDecoder.decode(request.getParameter(), fileEncoding.toString());
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		List<String> result=null;
+		StringBuffer tableRow = new StringBuffer();
 		String searchQuery ="", searchTerm = "";
 		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
-		if (request.getParameter().split("=").length > 1) 
+		if(postData.split("&").length > 1)
 		{
-			searchQuery = request.getParameter().split("=")[0];
-			searchTerm = request.getParameter().split("=")[1].replaceAll("\\s+", "");
-		}
-		if(searchQuery.equals("asin") && !(searchTerm.isEmpty()))
-		{
-			result = getData(searchTerm);
-			System.out.println("result= " + result);
-			//response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
-			String tableRow = "";
-			for(String eachrow : result)
+			for(String eachAsin : postData.split("&"))
 			{
-				tableRow+= eachrow;
+				
+				tableRow.append(splitData(eachAsin.split("="), result, searchQuery, searchTerm));
+				response.setResponse("<html><head><title>Project 3</title></head>"
+						+ "<body><table border = '2'><tr><th>Asin number</th>"
+						+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>" + tableRow.toString()
+						+ "</table></body></html>");
 			}
-			response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border = '2'><tr><th>Asin number</th>"
-					+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>"+
-					tableRow +"</table></body></html>");
+		}
+		else if(postData.contains("="))
+		{
+			tableRow.append(splitData(postData.split("="), result, searchQuery, searchTerm));
+			response.setResponse("<html><head><title>Project 3</title></head>"
+					+ "<body><table border = '2'><tr><th>Asin number</th>"
+					+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>" + tableRow.toString()
+					+ "</table></body></html>");
 		}
 		else
 		{
-			String file = HtmlPages.HTML_EMPTY_MANDATORY_FIELD;
-			response.setResponse(file);
+			response.setHeader("HTTP/1.1 404 error\n\r\n");
+			response.setResponse(HtmlPages.HTML_404);
 		}
 		return response;
 	}
@@ -116,6 +127,58 @@ public class FindHandler implements Handler
 		}
 
 		return result;
+	}
+	
+	
+	/**
+	 * splitData - Will take list of parameters from request and manipulate it to give list of data from inverted index 
+	 * @param parameters - list of parameters
+	 * @param result - it has result of list
+	 * @param searchQuery - will store query
+	 * @param searchTerm - will store term to search in inverted index
+	 * @return
+	 */
+
+	public String splitData(String parameters[], List<String> result, String searchQuery, String searchTerm) {
+		String tableRow = "";
+		System.out.println(parameters.length);
+		// int counter = 0;
+		if (parameters.length > 1) {
+			searchQuery = parameters[0];
+			searchTerm = parameters[1];
+			if (searchQuery.equals("asin") && !(searchTerm.isEmpty())) 
+			{
+				if (searchTerm.split(" ").length > 1) {
+					for (String eachSearchTerm : searchTerm.split(" ")) {
+
+						result = getData(eachSearchTerm);
+						// to limit records , to avoid java heap
+						int limit = 1100;
+						if (result.size() <= 1100) {
+							limit = result.size();
+						}
+						for (int i = 0; i < limit; i++) {
+							tableRow += result.get(i);
+						}
+					}
+				} else {
+					result = getData(searchTerm);
+					// to avoid java heap...limiting data
+					int limit = 1100;
+					if (result.size() <= 1100) {
+						limit = result.size();
+					}
+					for (int i = 0; i < limit; i++) {
+						tableRow += result.get(i);
+					}
+				}
+			}
+			else
+			{
+				tableRow = "<tr><td>INVALID QUERY</td></tr>";
+			}
+		}
+		return tableRow;
 	}
 
 }

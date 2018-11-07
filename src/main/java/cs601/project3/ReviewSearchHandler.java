@@ -76,41 +76,41 @@ public class ReviewSearchHandler implements Handler
 	{
 		
 		String postData = URLDecoder.decode(request.getParameter(), fileEncoding.toString());
-		
-		List<String> result=null;
-		String searchTerm = "", searchQuery ="";
+		System.out.println(postData);
+		List<String> result = null;
+		String searchTerm = "", searchQuery = "";
 		response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
 		String parameters[];
-		if(postData.contains("&"))
-		{
+		StringBuffer tableRow = new StringBuffer();
+		if (postData.split("&").length > 1) {
 			parameters = postData.split("&");
 			
-
-			for(String eachParameters : parameters)
+			for (String eachParameters : parameters) 
 			{
+				System.out.println(eachParameters);
 				String eachEqualParameters[] = eachParameters.split("=");
-				String tableRow = splitData(eachEqualParameters, result, searchQuery, searchTerm);
-				response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border = '2'><tr><th>Asin number</th>"
-						+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>"+
-						tableRow +"</table></body></html>");
+				tableRow.append(splitData(eachEqualParameters, result, searchQuery, searchTerm));
+				response.setResponse("<html><head><title>Project 3</title></head>"
+						+ "<body><table border = '2'><tr><th>Asin number</th>"
+						+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>" + tableRow.toString()
+						+ "</table></body></html>");
 			}
-		}
-		else if(postData.contains("="))
-		{
+		} else if (postData.contains("=")) {
 			parameters = postData.split("=");
-			String tableRow = splitData(parameters, result, searchQuery, searchTerm);
-			response.setResponse("<html><head><title>Project 3</title></head>"+"<body><table border ='2'><tr><th>Asin number</th>"
-					+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>"+
-					tableRow +"</table></body></html>");
+			tableRow.append(splitData(parameters, result, searchQuery, searchTerm));
+			response.setResponse(
+					"<html><head><title>Project 3</title></head>" + "<body><table border ='2'><tr><th>Asin number</th>"
+							+ "<th>Reviewer id / Questions </th><th>Review Text / Answers</th></tr>" + tableRow.toString()
+							+ "</table></body></html>");
 		}
-		else
-		{
+		else {
 			response.setHeader("HTTP/1.1 404 error\n\r\n");
 			response.setResponse(HtmlPages.HTML_404);
 		}
 
 		return response;
-	}
+
+		}
 	
 	/**
 	 * getData - will help to store and retrieve list of data from inverted index
@@ -129,13 +129,12 @@ public class ReviewSearchHandler implements Handler
 			result = initilizer.getInvertIndexReview().searchterm(word.toLowerCase());
 
 		} else {
-			result.add(StaticInfo.loading);
+			result.add("<tr><td>INVALID QUERY</td></tr>");
 
 		}
-
+		//System.out.println(result);
 		return result;
 	}
-
 	/**
 	 * splitData - Will take list of parameters from request and manipulate it to give list of data from inverted index 
 	 * @param parameters - list of parameters
@@ -144,41 +143,44 @@ public class ReviewSearchHandler implements Handler
 	 * @param searchTerm - will store term to search in inverted index
 	 * @return
 	 */
-	public String splitData(String parameters[], List<String> result, String searchQuery, String searchTerm)
-	{
-		String tableRow ="";
-		//int counter = 0;
-		if(parameters.length > 1)
-		{
+	public String splitData(String parameters[], List<String> result, String searchQuery, String searchTerm) {
+		String tableRow = "";
+		System.out.println(parameters.length);
+		// int counter = 0;
+		if (parameters.length > 1) {
 			searchQuery = parameters[0];
 			searchTerm = parameters[1];
-			if(searchQuery.equals("query") && !(searchTerm.isEmpty()))
+			if (searchQuery.equals("query") && !(searchTerm.isEmpty())) 
 			{
-				if(searchTerm.split(" ").length > 1)
-				{
-					for(String eachSearchTerm: searchTerm.split(" "))
-					{
+				if (searchTerm.split(" ").length > 1) {
+					for (String eachSearchTerm : searchTerm.split(" ")) {
 
 						result = getData(eachSearchTerm);
-						//to limit records , to avoid java heap
-						for(int i=0 ;i<1100;i++){
-							tableRow+= result.get(i);
+						// to limit records , to avoid java heap
+						int limit = 1100;
+						if (result.size() <= 1100) {
+							limit = result.size();
+						}
+						for (int i = 0; i < limit; i++) {
+							tableRow += result.get(i);
 						}
 					}
-				}
-				else
-				{
+				} else {
 					result = getData(searchTerm);
-					//to avoid java heap...limiting data
-					for(int i=0;i < 1100 ; i++)
-					{
-						tableRow+= result.get(i);
+					// to avoid java heap...limiting data
+					int limit = 1100;
+					if (result.size() <= 1100) {
+						limit = result.size();
+					}
+					for (int i = 0; i < limit; i++) {
+						tableRow += result.get(i);
 					}
 				}
 			}
 			else
 			{
-				tableRow = "INVALID QUERY"; 
+				
+				tableRow = "<tr><td>INVALID QUERY</td></tr>";
 			}
 		}
 		return tableRow;

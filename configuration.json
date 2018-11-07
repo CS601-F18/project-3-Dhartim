@@ -1,0 +1,10 @@
+{
+	"url": "https://slack.com/api/chat.postMessage",
+	"contentType": "application/json; charset=ISO-8859-1",
+	"token": "xoxp-378520430422-380170953316-471471444694-4b35110f6eb28a2e7d32576b33e7bf93",
+	"channel": "project3",
+	"reviewFile": "Cell_Phones_and_Accessories_5.json",
+	"qaFile": "qa_Cell_Phones_and_Accessories.json"
+	
+
+}
