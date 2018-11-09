@@ -170,8 +170,8 @@ public class ReviewSearchHandler implements Handler
 
 						result = getData(eachSearchTerm);
 						// to limit records , to avoid java heap
-						int limit = 70;
-						if (result.size() <= 70) {
+						int limit = 50;
+						if (result.size() <= 50) {
 							limit = result.size();
 						}
 						for (int i = 0; i < limit; i++) {
@@ -182,8 +182,8 @@ public class ReviewSearchHandler implements Handler
 					result = getData(searchTerm);
 					System.out.println("searchterm =" +searchTerm);
 					// to avoid java heap...limiting data
-					int limit = 70;
-					if (result.size() <= 70) {
+					int limit = 50;
+					if (result.size() <= 50) {
 						limit = result.size();
 					}
 					for (int i = 0; i < limit; i++) {
