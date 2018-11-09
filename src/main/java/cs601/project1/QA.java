@@ -1,5 +1,7 @@
 package cs601.project1;
 
+import org.jsoup.Jsoup;
+
 /**
  *
  * Contains fields for storing relevant information when reading the QA text
@@ -31,7 +33,7 @@ public class QA extends Amazon {
 	}
 
 	public String toString() {
-		return "<tr><td>" + this.asin + "</td><td>" + this.question + " </td><td>" + this.answer + "</td></tr>";
+		return "<tr><td>" + Jsoup.parse(this.asin).toString() + "</td><td>" + Jsoup.parse(this.question).toString() + " </td><td>" + Jsoup.parse(this.answer).toString() + "</td></tr>";
 	}
 
 }

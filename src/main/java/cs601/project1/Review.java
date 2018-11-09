@@ -1,5 +1,7 @@
 package cs601.project1;
 
+import org.jsoup.Jsoup;
+
 /**
  *
  * Contains fields for storing relevant information when reading the review text
@@ -45,7 +47,7 @@ public class Review extends Amazon {
 	}
 
 	public String toString() {
-		return "<tr><td>" + this.asin + "</td><td>" + this.reviewerID + "</td><td>" + this.reviewText + "</td></tr>";
+		return "<tr><td>" + Jsoup.parse(this.asin).toString() + "</td><td>" + Jsoup.parse(this.reviewerID).toString() + "</td><td>" + Jsoup.parse(this.reviewText).toString() + "</td></tr>";
 	}
 
 }

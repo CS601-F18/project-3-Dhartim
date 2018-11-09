@@ -9,7 +9,7 @@ public interface HtmlPages {
 	String HTML_405 = "<!DOCTYPE html>\r\n" + 
 			"<html>\r\n" + 
 			"<head>\r\n" + 
-			"<meta charset=\"ISO-8859-1\">\r\n" + 
+			"<meta charset=\"ISO-8859-1\" />\r\n" + 
 			"<title>405</title>\r\n" + 
 			"</head>\r\n" + 
 			"<body>\r\n" + 
@@ -20,7 +20,7 @@ public interface HtmlPages {
 	String HTML_404 =  
 			"<html>\r\n" + 
 			"<head>\r\n" + 
-			"<meta charset=\"ISO-8859-1\">\r\n" + 
+			"<meta charset=\"ISO-8859-1\" />\r\n" + 
 			"<title>404</title>\r\n" + 
 			"</head>\r\n" + 
 			"<body>\r\n" + 
@@ -31,7 +31,7 @@ public interface HtmlPages {
 	String HTML_EMPTY_MANDATORY_FIELD = "<!DOCTYPE html>\r\n" + 
 			"<html>\r\n" + 
 			"<head>\r\n" + 
-			"<meta charset=\"ISO-8859-1\">\r\n" + 
+			"<meta charset=\"ISO-8859-1\"/>\r\n" + 
 			"<title>404</title>\r\n" + 
 			"</head>\r\n" + 
 			"<body>\r\n" + 
@@ -42,7 +42,7 @@ public interface HtmlPages {
 	String HTML_FIND_FORM = "<!DOCTYPE html>\r\n" + 
 			"<html>\r\n" + 
 			"<head>\r\n" + 
-			"<meta charset=\"ISO-8859-1\">\r\n" + 
+			"<meta charset=\"ISO-8859-1\"/>\r\n" + 
 			"<title>Find Asin</title>\r\n" + 
 			"</head>\r\n" + 
 			"<body>\r\n" +
@@ -57,7 +57,7 @@ public interface HtmlPages {
 	String HTML_REVIEW_SEARCH_FORM = "<!DOCTYPE html>\r\n" + 
 			"<html>\r\n" + 
 			"<head>\r\n" + 
-			"<meta charset=\"ISO-8859-1\">\r\n" + 
+			"<meta charset=\"ISO-8859-1\"/>\r\n" + 
 			"<title>Review Search</title>\r\n" + 
 			"</head>\r\n" + 
 			"<body>\r\n" + 
@@ -73,7 +73,7 @@ public interface HtmlPages {
 	String HTML_CHAT_APPLICATION_FORM = "<!DOCTYPE html>\r\n" + 
 			"<html>\r\n" + 
 			"<head>\r\n" + 
-			"<meta charset=\"ISO-8859-1\">\r\n" + 
+			"<meta charset=\"ISO-8859-1\"/>\r\n" + 
 			"<title>Chat Application</title>\r\n" + 
 			"</head>\r\n" + 
 			"<body>\r\n" + 

@@ -11,27 +11,30 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.junit.AfterClass;
+
 //import javax.net.ssl.HttpsURLConnection;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 //import cs601.project1.InvertedIndexBuilder;
 
 public class InvertedIndexTest 
 {
-	HttpServer server;
+	static HttpServer server;
 	HttpURLConnection connection;
-	SetUpInvertedIndex invertedinIndex;
+	static SetUpInvertedIndex invertedinIndex;
 	SearchApplication search;
 	
-	@Before 
-	public void preProcess()
+	@BeforeClass
+	public static void preProcess()
 	{
 		server = new HttpServer(2020);
-		invertedinIndex = invertedinIndex.getInstance("configuration.json");
+		invertedinIndex = SetUpInvertedIndex.getInstance("configuration.json");
 		invertedinIndex.initInvertedIndex();
-		server.addMapping("/review", new ReviewSearchHandler());
+		server.addMapping("/reviewsearch", new ReviewSearchHandler());
 		server.addMapping("/find", new FindHandler());
 		server.startServer();
 	}
@@ -43,9 +46,10 @@ public class InvertedIndexTest
 		try {
 			connection = (HttpURLConnection) new URL("http://localhost:2020/reviewsearch").openConnection();
 			connection.connect();
-			assertEquals(connection.getResponseMessage(), "OK");
+			assertEquals(connection.getResponseCode(), 200);
 			connection.disconnect();
-		} catch (IOException e) {
+		} catch (IOException e) 
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -65,13 +69,13 @@ public class InvertedIndexTest
 			e.printStackTrace();
 		}
 	}
-
+	
 	public String checkResponse(URLConnection connection)throws IOException
 	{
+		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 		String line, response = "";
 			connection = (HttpURLConnection) new URL("http://localhost:2020/reviewsearch").openConnection();
 			connection.connect();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			
 			while((line = reader.readLine()) != null)
 			{
@@ -81,43 +85,31 @@ public class InvertedIndexTest
 			return response;
 	}
 	
-	
-	
-	@Test
-	public void checkFormInResponseTest()
+	@AfterClass
+	public static void endConnection()
 	{
-		
-		try {
-			connection = (HttpURLConnection) new URL("http://localhost:2020/reviewsearch").openConnection();
-			System.out.println(connection);
-			connection.connect();
-			//System.out.print(connection.connect());
-			System.out.println(checkResponse(connection));
-			String check = checkResponse(connection);
-			System.out.println(check);
-			assertEquals("html",checkResponse(connection).contains("html"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		server.stopServer(false);
 	}
 	
 //	@Test
-//	public void checkReviewParameterTest()
+//	public void checkFormInResponseTest()
 //	{
-//		try
-//		{
-//			connec
+//		
+//		try {
+//			connection = (HttpURLConnection) new URL("http://localhost:2020/reviewsearch").openConnection();
+//			System.out.println(connection);
+//			connection.connect();
+//			//System.out.print(connection.connect());
+//			System.out.println(checkResponse(connection));
+//			String check = checkResponse(connection);
+//			System.out.println(check);
+//			assertEquals("html",checkResponse(connection).contains("html"));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 //		}
+//		
 //	}
-	
-	//@Test
-//	public void reviewSearchCheckResponseTest()
-//	{
-//		connection = (HttpURLConnection) new URL("http://localhost:2020/reviewsearch").openConnection();
-//		connection.connect();
-//		//assertEquals(, );
-//	}
+
 
 }

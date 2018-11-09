@@ -51,18 +51,21 @@ public class Request
 	 * @param request -pass request and validate it.
 	 * @return method - either a post or Get
 	 */
-	public String validMethod(String request)
+	public boolean validMethod(String request)
 	{
-		String method = request;
+		//String method = request;
+		boolean result = false;
 		if(request.split(" ")[0].equals("GET"))
 		{
-			method = "GET";
+			this.setRequest("GET"); //= "GET";
+			result = true;
 		}
 		else if(request.split(" ")[0].equals("POST"))
 		{
-			method = "POST";
+			this.setRequest("POST"); //= "POST";
+			result = true;
 		}
-		return method;
+		return result;
 	}
 	/**
 	 * isPathValid - check if there is same api or not.
@@ -75,11 +78,12 @@ public class Request
 	{
 		Handler handler = new ErrorHandler();
 		
-		for (String path : handlersMap.keySet()) {
-			if (requestPath.contains(path)) 
+		for (String path : handlersMap.keySet()) 
+		{
+			if (requestPath.equals(path)) 
 			{
-				
 				handler = handlersMap.get(path);
+				//response.setHeader("HTTP/1.0 200 OK\n" + "\r\n");
 			}
 		}
 		return handler;

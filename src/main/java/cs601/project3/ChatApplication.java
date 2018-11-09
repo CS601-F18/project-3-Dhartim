@@ -14,7 +14,11 @@ public class ChatApplication {
 	private final static Logger logger =  Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 
 	public static void main(String[] args) 
 	{
-		
+		if(args.length != 1)
+		{
+			System.out.println("please specify configuration file name");
+			System.exit(0);
+		}
 		SlackBot slackBot = new SlackBot(args[0]);
 		int port = 9090;
 		HttpServer server = new HttpServer(port);

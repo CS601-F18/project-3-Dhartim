@@ -36,8 +36,6 @@ public class SlackBot
 	public boolean sendMsgToSlack(String message)
 	{
 		configuration = readConfigFile.readJsonFile(configurationfile);
-		
-		//System.out.println(message);
 		//get text from url in encoded form so has to decode it....
 		Charset fileEncoding = Charset.forName("ISO-8859-1");
 		
@@ -49,7 +47,6 @@ public class SlackBot
 			String encodemsg = URLDecoder.decode(message, fileEncoding.toString());
 			//System.out.println(encodemsg);
 			url = new URL(configuration.getUrl());
-			
 			//create secure connection 
 			connection = (HttpsURLConnection)url.openConnection();
 			//set HTTP method
@@ -95,6 +92,5 @@ public class SlackBot
 		connection.setRequestProperty("Content-Type", configuration.getContentType());	
 		connection.setRequestProperty("Authorization", "Bearer " + configuration.getToken());
 		return connection;
-		
 	}
 }

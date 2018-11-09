@@ -9,6 +9,8 @@ import cs601.project1.InvertedIndex;
 public class InvertedIndexInitilizer {
 
 	private static InvertedIndexInitilizer instance;
+	private InvertedIndex invertIndexReview;
+	private InvertedIndex invertIndexQA;
 
 	private InvertedIndexInitilizer() {
 	}
@@ -19,9 +21,6 @@ public class InvertedIndexInitilizer {
 		}
 		return instance;
 	}
-
-	InvertedIndex invertIndexReview;
-	InvertedIndex invertIndexQA;
 
 	public InvertedIndex getInvertIndexReview() {
 		return invertIndexReview;

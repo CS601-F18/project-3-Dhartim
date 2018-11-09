@@ -26,13 +26,16 @@ public class ReadConfigurationFile
 	public  ConfigurationBean readJsonFile(String filename)
 	{
 		System.out.println(filename);
-		try {
-			JsonReader reader = new JsonReader(new FileReader(filename));
-			configuration = gson.fromJson(reader, ConfigurationBean.class);
-			logger.log(Level.INFO, "Read json files");
-		} catch (FileNotFoundException e) 
+		if(filename != null)
 		{
-			System.exit(0);
+			try {
+				JsonReader reader = new JsonReader(new FileReader(filename));
+				configuration = gson.fromJson(reader, ConfigurationBean.class);
+				logger.log(Level.INFO, "Read json files");
+			} catch (FileNotFoundException e) 
+			{
+				System.exit(0);
+			}
 		}
 		return configuration;
 	}

@@ -27,11 +27,6 @@ public class HttpServer implements Runnable
 	private ExecutorService executor;
 	private boolean requestResult;
 	private static volatile boolean running = true;
-	private Handler handler;
-	//handle request from browser.
-	private Request request =  new Request();
-	//handle response from server.
-	private Response response = new Response(); 
 
 	public HttpServer(int PORT) 
 	{
@@ -76,16 +71,30 @@ public class HttpServer implements Runnable
 		while(running)
 		{
 			logger.log(Level.INFO, String.format(ServerMsgLog.serverUp));
-
-			try(Socket socket = server.accept();
+			//handle request from browser.
+			Request request =  new Request();
+			//handle response from server.
+			Response response = new Response(); 
+			Handler handler = null;
+			
+			try(
+					Socket socket = server.accept();
 					BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					InputStream instream = socket.getInputStream();
 					PrintWriter writer = new PrintWriter(socket.getOutputStream()))
 			{
 				String line = oneLine(instream);
+				
 				System.out.println(line);
 				requestResult = request.validRequest(line);
-				if(!requestResult)
+				if(!request.validMethod(line) )
+				{
+					handler = new BadMethodHandler();
+//					response.setHeader("HTTP/1.0 405 Method Not Allowed\n" + "\r\n");
+//					response.setResponse(HtmlPages.HTML_405);
+
+				}
+				else if(!requestResult)
 				{
 					handler = new ErrorHandler();
 				}
@@ -96,12 +105,13 @@ public class HttpServer implements Runnable
 					method = splitline[0];
 					path = splitline[1];
 				}
-				
-				handler = request.isPathValid(path, handlersMap, response);
+				//System.out.println();
 				request.setRequest(method);
+				if(handler == null)
+					handler = request.isPathValid(path, handlersMap, response);
+				System.out.println(request.getRequest());
 				int postLength = -1;
 				String postData;
-				
 				while(line != null && !line.trim().isEmpty()) 
 				{
 					line += "\n";
@@ -115,7 +125,11 @@ public class HttpServer implements Runnable
 				if (postLength > 0) 
 				{
 					postData = readAndPassPostData(reader, postLength);
-					request.setParameter(postData);
+					System.out.println(postData);
+					if (postData != null)
+					{
+						request.setParameter(postData);
+					}
 				}
 				if(handler != null)
 				{
@@ -172,6 +186,11 @@ public class HttpServer implements Runnable
 		}
 		postData = new String(charArray);
 		return postData;
+	}
+	
+	public void stopServer(boolean stop)
+	{
+		running = false;
 	}
 
 }
